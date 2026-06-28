@@ -4,6 +4,49 @@ import { ref, onValue } from 'firebase/database'
 import Dashboard from './components/Dashboard.jsx'
 import GuideTab from './components/GuideTab.jsx'
 
+const PASSWORD = '7926'
+
+function LoginScreen({ onLogin }) {
+  const [input, setInput] = useState('')
+  const [error, setError] = useState(false)
+
+  const submit = () => {
+    if (input === PASSWORD) {
+      localStorage.setItem('dashboard_auth', '1')
+      onLogin()
+    } else {
+      setError(true)
+      setInput('')
+    }
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', padding: '2.5rem', width: '100%', maxWidth: 360, boxShadow: 'var(--shadow-md)', textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: '1rem' }}>📱</div>
+        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: '0.5rem' }}>App Dashboard</h1>
+        <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: '1.5rem' }}>パスワードを入力してください</p>
+        <input
+          type="password"
+          value={input}
+          onChange={(e) => { setInput(e.target.value); setError(false) }}
+          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          placeholder="パスワード"
+          autoFocus
+          style={{ width: '100%', padding: '0.6rem 0.75rem', border: `1px solid ${error ? 'var(--danger)' : 'var(--border)'}`, borderRadius: 'var(--radius-sm)', fontSize: 16, marginBottom: '0.5rem', textAlign: 'center', letterSpacing: 4 }}
+        />
+        {error && <p style={{ fontSize: 12, color: 'var(--danger)', marginBottom: '0.5rem' }}>パスワードが違います</p>}
+        <button
+          onClick={submit}
+          style={{ width: '100%', padding: '0.6rem', background: 'var(--primary)', color: '#fff', borderRadius: 'var(--radius-sm)', fontSize: 15, fontWeight: 500, marginTop: '0.5rem' }}
+        >
+          ログイン
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function SetupScreen() {
   return (
     <div style={{ maxWidth: 640, margin: '4rem auto', padding: '0 1.5rem' }}>
@@ -62,10 +105,13 @@ function SetupScreen() {
 }
 
 export default function App() {
+  const [authed, setAuthed] = useState(localStorage.getItem('dashboard_auth') === '1')
   const [tab, setTab] = useState('dashboard')
   const [apps, setApps] = useState({})
   const [lastSynced, setLastSynced] = useState(null)
   const [loading, setLoading] = useState(isFirebaseConfigured)
+
+  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />
 
   useEffect(() => {
     if (!isFirebaseConfigured) return
