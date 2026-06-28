@@ -180,6 +180,52 @@ export default function AppCard({ app }) {
         </div>
       )}
 
+      {/* コード分析 */}
+      {app.codeStats && (
+        <div style={{
+          background: 'var(--surface2)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '0.6rem 0.75rem',
+          marginBottom: '0.75rem',
+          fontSize: 12,
+        }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: app.codeStats.features?.length ? '0.5rem' : 0 }}>
+            {app.codeStats.screenCount > 0 && (
+              <span style={{ color: 'var(--text2)' }}>
+                <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{app.codeStats.screenCount}</span> 画面
+              </span>
+            )}
+            {app.codeStats.entityCount > 0 && (
+              <span style={{ color: 'var(--text2)' }}>
+                <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{app.codeStats.entityCount}</span> DBテーブル
+              </span>
+            )}
+            {app.codeStats.workerCount > 0 && (
+              <span style={{ color: 'var(--text2)' }}>
+                <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{app.codeStats.workerCount}</span> Worker
+              </span>
+            )}
+            {app.codeStats.permissions?.length > 0 && (
+              <span style={{ color: 'var(--text2)' }}>
+                権限: {app.codeStats.permissions.join(' · ')}
+              </span>
+            )}
+          </div>
+          {app.codeStats.features?.length > 0 && (
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {app.codeStats.features.map(f => (
+                <span key={f} style={{
+                  background: 'var(--primary-light)',
+                  color: 'var(--primary)',
+                  fontSize: 11, padding: '1px 6px',
+                  borderRadius: 99, fontWeight: 500,
+                }}>{f}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* コミット履歴トグル */}
       <button
         onClick={() => setShowCommits(!showCommits)}

@@ -32,6 +32,84 @@ function runGit(cmd, cwd) {
   }
 }
 
+function getAllKtFiles(dir, results = []) {
+  if (!existsSync(dir)) return results
+  for (const entry of readdirSync(dir)) {
+    if (entry === 'build' || entry === '.gradle' || entry === 'node_modules') continue
+    const full = join(dir, entry)
+    try {
+      if (statSync(full).isDirectory()) getAllKtFiles(full, results)
+      else if (entry.endsWith('.kt')) results.push({ name: entry, path: full })
+    } catch {}
+  }
+  return results
+}
+
+function safeRead(filePath) {
+  try { return readFileSync(filePath, 'utf-8') } catch { return '' }
+}
+
+function scanCodeStats(repoPath) {
+  const stats = {
+    screenCount: 0,
+    entityCount: 0,
+    workerCount: 0,
+    permissions: [],
+    features: [],
+  }
+
+  // Kotlinファイルをスキャン
+  const srcDir = join(repoPath, 'app', 'src', 'main', 'java')
+  const ktFiles = getAllKtFiles(srcDir)
+
+  for (const { name, path: filePath } of ktFiles) {
+    if (name.endsWith('Screen.kt')) stats.screenCount++
+    if (name.endsWith('Worker.kt')) stats.workerCount++
+
+    // @Entity のカウント（Entityファイルのみ読む）
+    if (name.endsWith('Entity.kt') || filePath.includes('database') || filePath.includes('entity')) {
+      const content = safeRead(filePath)
+      if (content.includes('@Entity')) stats.entityCount++
+    }
+  }
+
+  // AndroidManifest.xml から権限を取得
+  const manifestPath = join(repoPath, 'app', 'src', 'main', 'AndroidManifest.xml')
+  const manifest = safeRead(manifestPath)
+  const permMatches = manifest.match(/uses-permission[^>]+android:name="([^"]+)"/g) || []
+  stats.permissions = permMatches
+    .map(p => {
+      const m = p.match(/"([^"]+)"/)
+      const full = m?.[1] || ''
+      return full.split('.').pop()
+    })
+    .filter(p => p && !['RECEIVE_BOOT_COMPLETED'].includes(p))
+    .slice(0, 8)
+
+  // build.gradle.kts から機能を判定
+  const gradle = safeRead(join(repoPath, 'app', 'build.gradle.kts'))
+  const featureMap = [
+    { key: 'room',           label: 'Room DB' },
+    { key: 'hilt',           label: 'Hilt DI' },
+    { key: 'compose',        label: 'Jetpack Compose' },
+    { key: 'work',           label: 'WorkManager' },
+    { key: 'crashlytics',    label: 'Crashlytics' },
+    { key: 'biometric',      label: '生体認証' },
+    { key: 'sqlcipher',      label: 'DB暗号化' },
+    { key: 'retrofit',       label: 'Retrofit' },
+    { key: 'gemini',         label: 'Gemini AI' },
+    { key: 'anthropic',      label: 'Claude AI' },
+    { key: 'openai',         label: 'OpenAI' },
+    { key: 'navigation',     label: 'Navigation' },
+    { key: 'datastore',      label: 'DataStore' },
+    { key: 'camera',         label: 'CameraX' },
+    { key: 'maps',           label: 'Google Maps' },
+  ]
+  stats.features = featureMap.filter(f => gradle.toLowerCase().includes(f.key)).map(f => f.label)
+
+  return stats
+}
+
 function getRepoInfo(repoPath) {
   const name = repoPath.split(/[\\/]/).pop()
   const branch = runGit('rev-parse --abbrev-ref HEAD', repoPath)
@@ -115,13 +193,17 @@ async function sync() {
     const info = getRepoInfo(repoPath)
     const existing = existingData[info.name] || {}
 
+    const codeStats = scanCodeStats(repoPath)
+
     appsData[info.name] = {
       ...info,
+      codeStats,
       manual: existing.manual || {
         wave: '',
         security: false,
         performance: false,
         testing: false,
+        assets: false,
         build: false,
         playstore: false,
         notes: '',
@@ -130,7 +212,7 @@ async function sync() {
     }
     const githubMark = info.isOnGitHub ? '✅ GitHub' : '⚠ GitHubなし'
     console.log(
-      `  ✓ ${info.name.padEnd(22)} ${githubMark.padEnd(16)} branch: ${info.branch} | ahead: ${info.aheadCount}`
+      `  ✓ ${info.name.padEnd(22)} ${githubMark.padEnd(16)} 画面:${codeStats.screenCount} DB:${codeStats.entityCount} Worker:${codeStats.workerCount}`
     )
   }
 
