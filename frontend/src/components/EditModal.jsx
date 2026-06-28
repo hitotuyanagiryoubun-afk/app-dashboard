@@ -6,6 +6,7 @@ const CHECKLIST = [
   { key: 'security',    label: 'セキュリティ' },
   { key: 'performance', label: 'パフォーマンス' },
   { key: 'testing',     label: 'テスト・修正' },
+  { key: 'assets',      label: 'アイコン・画像' },
   { key: 'build',       label: 'ビルド・署名' },
   { key: 'playstore',   label: 'PlayStore申請' },
 ]
@@ -17,6 +18,7 @@ export default function EditModal({ app, onClose }) {
     security: !!m.security,
     performance: !!m.performance,
     testing: !!m.testing,
+    assets: !!m.assets,
     build: !!m.build,
     playstore: !!m.playstore,
   })

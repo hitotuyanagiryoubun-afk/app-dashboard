@@ -5,11 +5,12 @@ import CommitHistory from './CommitHistory.jsx'
 import EditModal from './EditModal.jsx'
 
 const CHECKLIST = [
-  { key: 'security',    label: 'セキュリティ',      weight: 20 },
-  { key: 'performance', label: 'パフォーマンス',    weight: 20 },
-  { key: 'testing',     label: 'テスト・修正',      weight: 20 },
-  { key: 'build',       label: 'ビルド・署名',      weight: 20 },
-  { key: 'playstore',   label: 'PlayStore申請',    weight: 20 },
+  { key: 'security',    label: 'セキュリティ',      weight: 15 },
+  { key: 'performance', label: 'パフォーマンス',    weight: 15 },
+  { key: 'testing',     label: 'テスト・修正',      weight: 10 },
+  { key: 'assets',      label: 'アイコン・画像',    weight: 10 },
+  { key: 'build',       label: 'ビルド・署名',      weight: 25 },
+  { key: 'playstore',   label: 'PlayStore申請',    weight: 25 },
 ]
 
 function calcProgress(manual) {
