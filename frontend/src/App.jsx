@@ -3,6 +3,7 @@ import { db, isFirebaseConfigured } from './firebase.js'
 import { ref, onValue } from 'firebase/database'
 import Dashboard from './components/Dashboard.jsx'
 import GuideTab from './components/GuideTab.jsx'
+import DocsTab from './components/DocsTab.jsx'
 
 const PASSWORD = '7926'
 
@@ -143,6 +144,7 @@ export default function App() {
           <nav style={{ display: 'flex', gap: 4, flex: 1 }}>
             {[
               { key: 'dashboard', label: 'アプリ一覧' },
+              { key: 'docs', label: '指示書・プロンプト' },
               { key: 'guide', label: 'PlayStore 出品ガイド' },
             ].map(({ key, label }) => (
               <button
@@ -172,6 +174,7 @@ export default function App() {
 
       <main style={{ maxWidth: 1200, margin: '0 auto', padding: '1.5rem' }}>
         {tab === 'dashboard' && <Dashboard apps={apps} loading={loading} />}
+        {tab === 'docs' && <DocsTab />}
         {tab === 'guide' && <GuideTab />}
       </main>
     </div>
