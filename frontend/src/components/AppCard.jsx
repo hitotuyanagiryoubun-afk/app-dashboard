@@ -38,6 +38,7 @@ export default function AppCard({ app }) {
 
   const isGitHub = app.isOnGitHub
   const hasUnpushed = app.aheadCount > 0
+  const hasUncommitted = app.uncommittedCount > 0
 
   return (
     <div style={{
@@ -51,6 +52,11 @@ export default function AppCard({ app }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {app.icon ? (
+              <img src={app.icon} alt="" style={{ width: 24, height: 24, borderRadius: 6, flexShrink: 0 }} />
+            ) : (
+              <span style={{ fontSize: 18, flexShrink: 0 }}>📱</span>
+            )}
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{app.name}</h3>
 
             {/* GitHub状態バッジ */}
@@ -72,6 +78,18 @@ export default function AppCard({ app }) {
                 color: 'var(--warning)',
               }}>
                 ↑ {app.aheadCount} 未push
+              </span>
+            )}
+
+            {/* 未コミットバッジ */}
+            {hasUncommitted && (
+              <span style={{
+                fontSize: 11, fontWeight: 500, padding: '2px 8px',
+                borderRadius: 20,
+                background: 'var(--danger-light)',
+                color: 'var(--danger)',
+              }}>
+                ✎ {app.uncommittedCount} 未コミット
               </span>
             )}
           </div>

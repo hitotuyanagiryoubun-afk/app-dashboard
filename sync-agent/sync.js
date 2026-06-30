@@ -107,7 +107,33 @@ function scanCodeStats(repoPath) {
   ]
   stats.features = featureMap.filter(f => gradle.toLowerCase().includes(f.key)).map(f => f.label)
 
+  // 署名設定ファイルの有無
+  stats.hasSigningConfig = existsSync(join(repoPath, 'keystore.properties'))
+  if (stats.hasSigningConfig) stats.features.push('🔑 署名設定')
+
   return stats
+}
+
+function getUncommittedCount(repoPath) {
+  const status = runGit('status --porcelain', repoPath)
+  return status ? status.split('\n').filter(Boolean).length : 0
+}
+
+function getAppIcon(repoPath) {
+  const resDir = join(repoPath, 'app', 'src', 'main', 'res')
+  for (const dpi of ['mipmap-mdpi', 'mipmap-hdpi']) {
+    for (const ext of ['webp', 'png']) {
+      const iconPath = join(resDir, dpi, `ic_launcher.${ext}`)
+      if (existsSync(iconPath)) {
+        try {
+          const buf = readFileSync(iconPath)
+          const mime = ext === 'webp' ? 'image/webp' : 'image/png'
+          return `data:${mime};base64,${buf.toString('base64')}`
+        } catch {}
+      }
+    }
+  }
+  return ''
 }
 
 function getRepoInfo(repoPath) {
@@ -148,6 +174,8 @@ function getRepoInfo(repoPath) {
     isOnGitHub,
     remoteUrl: remoteUrl || '',
     commits,
+    uncommittedCount: getUncommittedCount(repoPath),
+    icon: getAppIcon(repoPath),
     lastSynced: new Date().toISOString(),
   }
 }

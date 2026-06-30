@@ -112,10 +112,8 @@ export default function App() {
   const [lastSynced, setLastSynced] = useState(null)
   const [loading, setLoading] = useState(isFirebaseConfigured)
 
-  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />
-
   useEffect(() => {
-    if (!isFirebaseConfigured) return
+    if (!authed || !isFirebaseConfigured) return
     const unsubApps = onValue(ref(db, 'apps'), (snap) => {
       setApps(snap.val() || {})
       setLoading(false)
@@ -124,7 +122,9 @@ export default function App() {
       setLastSynced(snap.val())
     })
     return () => { unsubApps(); unsubSync() }
-  }, [])
+  }, [authed])
+
+  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />
 
   if (!isFirebaseConfigured) return <SetupScreen />
 
