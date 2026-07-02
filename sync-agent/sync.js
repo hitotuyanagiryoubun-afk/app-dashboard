@@ -109,10 +109,9 @@ function scanCodeStats(repoPath) {
   stats.todoCount = todoCount
 
   // リリースビルド済みか
-  stats.hasReleaseBuild = (
-    existsSync(join(repoPath, 'app', 'build', 'outputs', 'bundle', 'release')) ||
-    existsSync(join(repoPath, 'app', 'build', 'outputs', 'apk', 'release'))
-  )
+  const releaseBuild = getLastReleaseBuild(repoPath)
+  stats.hasReleaseBuild = !!releaseBuild
+  stats.lastReleaseBuild = releaseBuild || null
 
   const featureMap = [
     { key: 'room',           label: 'Room DB' },
@@ -138,6 +137,27 @@ function scanCodeStats(repoPath) {
   if (stats.hasSigningConfig) stats.features.push('🔑 署名設定')
 
   return stats
+}
+
+function getLastReleaseBuild(repoPath) {
+  const targets = [
+    { dir: join(repoPath, 'app', 'build', 'outputs', 'bundle', 'release'), ext: '.aab', type: 'AAB' },
+    { dir: join(repoPath, 'app', 'build', 'outputs', 'apk',    'release'), ext: '.apk', type: 'APK' },
+  ]
+  let latest = null
+  for (const { dir, ext, type } of targets) {
+    if (!existsSync(dir)) continue
+    try {
+      for (const file of readdirSync(dir)) {
+        if (!file.endsWith(ext)) continue
+        const mtime = statSync(join(dir, file)).mtime
+        if (!latest || mtime > new Date(latest.isoDate)) {
+          latest = { isoDate: mtime.toISOString(), type, fileName: file }
+        }
+      }
+    } catch {}
+  }
+  return latest
 }
 
 function getUncommittedCount(repoPath) {

@@ -343,6 +343,34 @@ export default function AppCard({ app }) {
         </div>
       )}
 
+      {/* リリースビルド情報 */}
+      {app.codeStats?.lastReleaseBuild ? (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          fontSize: 12, color: 'var(--text2)',
+          background: 'var(--success-light)',
+          border: '1px solid var(--success)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '0.4rem 0.75rem',
+          marginBottom: '0.75rem',
+        }}>
+          <span style={{ color: 'var(--success)', fontWeight: 600 }}>📦</span>
+          <span>
+            最後のリリースビルド:{' '}
+            <strong>{relativeTime(app.codeStats.lastReleaseBuild.isoDate)}</strong>
+            {' '}
+            <span style={{ color: 'var(--text3)' }}>({app.codeStats.lastReleaseBuild.type})</span>
+          </span>
+        </div>
+      ) : app.codeStats && (
+        <div style={{
+          fontSize: 12, color: 'var(--text3)',
+          marginBottom: '0.75rem',
+        }}>
+          📦 リリースビルド未検出
+        </div>
+      )}
+
       {/* PlayStore リンク */}
       {manual.playStoreUrl && (
         <a
