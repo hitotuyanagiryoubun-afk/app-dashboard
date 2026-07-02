@@ -137,7 +137,7 @@ export default function Dashboard({ apps, loading, onOpenDocs }) {
 
       {/* フィルタ・ソート */}
       {all.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
+        <div className="filter-bar">
           <span style={{ fontSize: 12, color: 'var(--text3)', marginRight: 2 }}>絞り込み:</span>
           {[
             { key: 'all',           label: 'すべて' },
@@ -183,11 +183,7 @@ export default function Dashboard({ apps, loading, onOpenDocs }) {
           )}
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(520px, 1fr))',
-          gap: '1rem',
-        }}>
+        <div className="app-grid">
           {appList.map((app) => (
             <AppCard key={app.name} app={app} onOpenDocs={onOpenDocs} />
           ))}

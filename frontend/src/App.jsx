@@ -149,31 +149,32 @@ export default function App() {
       <header style={{
         background: 'var(--surface)',
         borderBottom: '1px solid var(--border)',
-        padding: '0 1.5rem',
+        padding: '0 1rem',
         position: 'sticky', top: 0, zIndex: 100,
         boxShadow: 'var(--shadow)',
       }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: '2rem', height: 56 }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: '1rem', minHeight: 56, flexWrap: 'wrap', padding: '0.25rem 0' }}>
           <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--primary)', whiteSpace: 'nowrap' }}>
-            App Dashboard
+            📱 App
           </h1>
-          <nav style={{ display: 'flex', gap: 4, flex: 1 }}>
+          <nav style={{ display: 'flex', gap: 2, flex: 1, flexWrap: 'wrap' }}>
             {[
-              { key: 'dashboard', label: 'アプリ一覧' },
-              { key: 'docs', label: '指示書・プロンプト' },
-              { key: 'guide', label: 'PlayStore 出品ガイド' },
-            ].map(({ key, label }) => (
+              { key: 'dashboard', label: 'アプリ一覧',       short: '一覧' },
+              { key: 'docs',      label: '指示書',           short: '指示書' },
+              { key: 'guide',     label: 'PlayStore ガイド', short: 'ガイド' },
+            ].map(({ key, label, short }) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}
                 style={{
-                  padding: '0.4rem 1rem',
+                  padding: '0.35rem 0.75rem',
                   borderRadius: 'var(--radius-sm)',
                   fontWeight: tab === key ? 700 : 400,
                   color: tab === key ? 'var(--primary)' : 'var(--text2)',
                   background: tab === key ? 'var(--primary-light)' : 'transparent',
-                  fontSize: 14,
+                  fontSize: 13,
                   transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {label}
@@ -181,8 +182,8 @@ export default function App() {
             ))}
           </nav>
           {lastSynced && (
-            <span style={{ fontSize: 12, color: 'var(--text3)', whiteSpace: 'nowrap' }}>
-              最終同期: {new Date(lastSynced).toLocaleString('ja-JP')}
+            <span className="sync-time" style={{ fontSize: 11, color: 'var(--text3)', whiteSpace: 'nowrap' }}>
+              同期: {new Date(lastSynced).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
           <button
