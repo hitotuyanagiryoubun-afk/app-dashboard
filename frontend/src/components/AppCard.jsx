@@ -24,6 +24,22 @@ function progressColor(pct) {
   return 'var(--danger)'
 }
 
+function relativeTime(isoDate) {
+  if (!isoDate) return ''
+  const diff = Date.now() - new Date(isoDate).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(mins / 60)
+  const days = Math.floor(hours / 24)
+  const weeks = Math.floor(days / 7)
+  const months = Math.floor(days / 30)
+  if (mins < 1)    return 'たった今'
+  if (mins < 60)   return `${mins}分前`
+  if (hours < 24)  return `${hours}時間前`
+  if (days < 7)    return `${days}日前`
+  if (weeks < 5)   return `${weeks}週間前`
+  return `${months}ヶ月前`
+}
+
 export default function AppCard({ app }) {
   const [showCommits, setShowCommits] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
@@ -208,7 +224,9 @@ export default function AppCard({ app }) {
           <span style={{ color: 'var(--text3)' }}>最新: </span>
           <code style={{ color: 'var(--primary)', marginRight: 6 }}>{app.commits[0].hash}</code>
           <span style={{ color: 'var(--text2)' }}>{app.commits[0].subject}</span>
-          <span style={{ color: 'var(--text3)', marginLeft: 6 }}>{app.commits[0].date}</span>
+          <span style={{ color: 'var(--text3)', marginLeft: 6 }}>
+            {relativeTime(app.commits[0].isoDate) || app.commits[0].date}
+          </span>
         </div>
       )}
 
@@ -223,6 +241,31 @@ export default function AppCard({ app }) {
           borderLeft: '3px solid var(--primary)',
         }}>
           {manual.notes}
+        </div>
+      )}
+
+      {/* 署名設定の提案 */}
+      {app.codeStats?.hasSigningConfig && !manual.build && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          fontSize: 12, background: 'var(--warning-light)',
+          border: '1px solid var(--warning)',
+          borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
+          marginBottom: '0.75rem', gap: 8,
+        }}>
+          <span style={{ color: 'var(--warning)', fontWeight: 500 }}>
+            🔑 keystore.properties が検出されました
+          </span>
+          <button
+            onClick={() => toggleCheck('build')}
+            style={{
+              fontSize: 11, padding: '2px 10px',
+              background: 'var(--warning)', color: '#fff',
+              borderRadius: 99, fontWeight: 600, flexShrink: 0,
+            }}
+          >
+            ビルド・署名 をチェック
+          </button>
         </div>
       )}
 
@@ -280,6 +323,22 @@ export default function AppCard({ app }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* PlayStore リンク */}
+      {manual.playStoreUrl && (
+        <a
+          href={manual.playStoreUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            fontSize: 12, color: 'var(--primary)', fontWeight: 500,
+            marginBottom: '0.5rem',
+          }}
+        >
+          ▶ Google Play で開く
+        </a>
       )}
 
       {/* コミット履歴トグル */}

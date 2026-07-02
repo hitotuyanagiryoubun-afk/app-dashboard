@@ -23,6 +23,7 @@ export default function EditModal({ app, onClose }) {
     playstore: !!m.playstore,
   })
   const [notes, setNotes] = useState(m.notes || '')
+  const [playStoreUrl, setPlayStoreUrl] = useState(m.playStoreUrl || '')
   const [progressOverride, setProgressOverride] = useState(
     m.progressOverride >= 0 ? m.progressOverride : ''
   )
@@ -35,6 +36,7 @@ export default function EditModal({ app, onClose }) {
       ...checks,
       notes,
       progressOverride: progressOverride !== '' ? Number(progressOverride) : -1,
+      playStoreUrl,
     })
     setSaving(false)
     onClose()
@@ -114,6 +116,23 @@ export default function EditModal({ app, onClose }) {
             style={{
               width: '100%', padding: '0.5rem 0.75rem',
               border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+            }}
+          />
+        </label>
+
+        {/* PlayStore URL */}
+        <label style={{ display: 'block', marginBottom: '1rem' }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text2)', marginBottom: 4 }}>
+            Google Play Console URL（任意）
+          </div>
+          <input
+            value={playStoreUrl}
+            onChange={(e) => setPlayStoreUrl(e.target.value)}
+            placeholder="https://play.google.com/store/apps/details?id=..."
+            style={{
+              width: '100%', padding: '0.5rem 0.75rem',
+              border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+              fontSize: 12,
             }}
           />
         </label>
