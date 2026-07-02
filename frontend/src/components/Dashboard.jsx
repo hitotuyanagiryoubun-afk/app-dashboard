@@ -33,8 +33,10 @@ export default function Dashboard({ apps, loading }) {
   let appList = Object.values(apps)
   if (filterBy === 'github')   appList = appList.filter(a => a.isOnGitHub)
   if (filterBy === 'nogithub') appList = appList.filter(a => !a.isOnGitHub)
-  if (filterBy === 'stale')    appList = appList.filter(isStale)
+  if (filterBy === 'stale')       appList = appList.filter(isStale)
   if (filterBy === 'uncommitted') appList = appList.filter(a => a.uncommittedCount > 0)
+  if (['開発中', 'レビュー申請中', '公開済み', '非公開'].includes(filterBy))
+    appList = appList.filter(a => (a.manual?.playStoreStatus || '') === filterBy)
 
   appList.sort((a, b) => {
     if (sortBy === 'name')     return a.name.localeCompare(b.name)
@@ -115,11 +117,14 @@ export default function Dashboard({ apps, loading }) {
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: 'var(--text3)', marginRight: 2 }}>絞り込み:</span>
           {[
-            { key: 'all',          label: 'すべて' },
-            { key: 'github',       label: '✓ GitHub' },
-            { key: 'nogithub',     label: '⚠ GitHubなし' },
-            { key: 'uncommitted',  label: '✎ 未コミットあり' },
-            { key: 'stale',        label: '⏸ 停滞中' },
+            { key: 'all',           label: 'すべて' },
+            { key: 'github',        label: '✓ GitHub' },
+            { key: 'nogithub',      label: '⚠ GitHubなし' },
+            { key: 'uncommitted',   label: '✎ 未コミット' },
+            { key: 'stale',         label: '⏸ 停滞中' },
+            { key: '開発中',         label: '🔨 開発中' },
+            { key: 'レビュー申請中', label: '📋 申請中' },
+            { key: '公開済み',       label: '✅ 公開済み' },
           ].map(({ key, label }) => (
             <button key={key} onClick={() => setFilterBy(key)} style={btnStyle(filterBy === key)}>
               {label}

@@ -11,6 +11,14 @@ const CHECKLIST = [
   { key: 'playstore',   label: 'PlayStore申請' },
 ]
 
+const STATUS_OPTIONS = [
+  { value: '',              label: '未設定' },
+  { value: '開発中',        label: '🔨 開発中' },
+  { value: 'レビュー申請中', label: '📋 レビュー申請中' },
+  { value: '公開済み',      label: '✅ 公開済み' },
+  { value: '非公開',        label: '⏸ 非公開' },
+]
+
 export default function EditModal({ app, onClose }) {
   const m = app.manual || {}
   const [wave, setWave] = useState(m.wave || '')
@@ -24,6 +32,7 @@ export default function EditModal({ app, onClose }) {
   })
   const [notes, setNotes] = useState(m.notes || '')
   const [playStoreUrl, setPlayStoreUrl] = useState(m.playStoreUrl || '')
+  const [playStoreStatus, setPlayStoreStatus] = useState(m.playStoreStatus || '')
   const [progressOverride, setProgressOverride] = useState(
     m.progressOverride >= 0 ? m.progressOverride : ''
   )
@@ -37,6 +46,7 @@ export default function EditModal({ app, onClose }) {
       notes,
       progressOverride: progressOverride !== '' ? Number(progressOverride) : -1,
       playStoreUrl,
+      playStoreStatus,
     })
     setSaving(false)
     onClose()
@@ -65,6 +75,26 @@ export default function EditModal({ app, onClose }) {
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: '1.25rem' }}>
           {app.name} を編集
         </h2>
+
+        {/* PlayStore ステータス */}
+        <label style={{ display: 'block', marginBottom: '1rem' }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text2)', marginBottom: 4 }}>
+            PlayStore ステータス
+          </div>
+          <select
+            value={playStoreStatus}
+            onChange={(e) => setPlayStoreStatus(e.target.value)}
+            style={{
+              width: '100%', padding: '0.5rem 0.75rem',
+              border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+              background: 'var(--surface)', color: 'var(--text)',
+            }}
+          >
+            {STATUS_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </label>
 
         {/* Wave */}
         <label style={{ display: 'block', marginBottom: '1rem' }}>

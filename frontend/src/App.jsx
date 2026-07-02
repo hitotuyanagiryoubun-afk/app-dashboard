@@ -111,6 +111,16 @@ export default function App() {
   const [apps, setApps] = useState({})
   const [lastSynced, setLastSynced] = useState(null)
   const [loading, setLoading] = useState(isFirebaseConfigured)
+  const [dark, setDark] = useState(() => {
+    const stored = localStorage.getItem('dashboard_dark')
+    if (stored !== null) return stored === '1'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('dashboard_dark', dark ? '1' : '0')
+  }, [dark])
 
   useEffect(() => {
     if (!authed || !isFirebaseConfigured) return
@@ -169,6 +179,19 @@ export default function App() {
               最終同期: {new Date(lastSynced).toLocaleString('ja-JP')}
             </span>
           )}
+          <button
+            onClick={() => setDark(d => !d)}
+            title={dark ? 'ライトモードへ' : 'ダークモードへ'}
+            style={{
+              fontSize: 18, padding: '0.25rem 0.4rem',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text2)',
+              border: '1px solid var(--border)',
+              lineHeight: 1,
+            }}
+          >
+            {dark ? '☀️' : '🌙'}
+          </button>
         </div>
       </header>
 

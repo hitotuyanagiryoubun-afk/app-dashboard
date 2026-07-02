@@ -52,6 +52,12 @@ export default function AppCard({ app }) {
     await update(ref(db, `apps/${app.name}/manual`), { [key]: newVal })
   }
 
+  const STATUS_STYLE = {
+    '開発中':        { bg: 'var(--surface2)',      color: 'var(--text2)' },
+    'レビュー申請中': { bg: 'var(--warning-light)', color: 'var(--warning)' },
+    '公開済み':      { bg: 'var(--success-light)', color: 'var(--success)' },
+    '非公開':        { bg: 'var(--danger-light)',  color: 'var(--danger)' },
+  }
   const isGitHub = app.isOnGitHub
   const hasUnpushed = app.aheadCount > 0
   const hasUncommitted = app.uncommittedCount > 0
@@ -122,6 +128,18 @@ export default function AppCard({ app }) {
                 color: 'var(--text3)',
               }}>
                 ⏸ 停滞中
+              </span>
+            )}
+
+            {/* PlayStore ステータスバッジ */}
+            {manual.playStoreStatus && STATUS_STYLE[manual.playStoreStatus] && (
+              <span style={{
+                fontSize: 11, fontWeight: 600, padding: '2px 8px',
+                borderRadius: 20,
+                background: STATUS_STYLE[manual.playStoreStatus].bg,
+                color: STATUS_STYLE[manual.playStoreStatus].color,
+              }}>
+                {manual.playStoreStatus}
               </span>
             )}
 
