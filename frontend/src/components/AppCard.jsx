@@ -39,6 +39,10 @@ export default function AppCard({ app }) {
   const isGitHub = app.isOnGitHub
   const hasUnpushed = app.aheadCount > 0
   const hasUncommitted = app.uncommittedCount > 0
+  const isStale = (() => {
+    const d = app.commits?.[0]?.isoDate
+    return d ? (Date.now() - new Date(d).getTime()) > 7 * 24 * 60 * 60 * 1000 : false
+  })()
 
   return (
     <div style={{
@@ -90,6 +94,30 @@ export default function AppCard({ app }) {
                 color: 'var(--danger)',
               }}>
                 ✎ {app.uncommittedCount} 未コミット
+              </span>
+            )}
+
+            {/* 停滞バッジ */}
+            {isStale && (
+              <span style={{
+                fontSize: 11, fontWeight: 500, padding: '2px 8px',
+                borderRadius: 20,
+                background: '#f3f3f3',
+                color: 'var(--text3)',
+              }}>
+                ⏸ 停滞中
+              </span>
+            )}
+
+            {/* バージョンバッジ */}
+            {app.codeStats?.versionName && (
+              <span style={{
+                fontSize: 11, fontWeight: 500, padding: '2px 8px',
+                borderRadius: 20,
+                background: 'var(--surface2)',
+                color: 'var(--text2)',
+              }}>
+                v{app.codeStats.versionName}
               </span>
             )}
           </div>
@@ -221,6 +249,16 @@ export default function AppCard({ app }) {
             {app.codeStats.workerCount > 0 && (
               <span style={{ color: 'var(--text2)' }}>
                 <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{app.codeStats.workerCount}</span> Worker
+              </span>
+            )}
+            {app.codeStats.testFileCount > 0 && (
+              <span style={{ color: 'var(--text2)' }}>
+                <span style={{ color: 'var(--success)', fontWeight: 700 }}>{app.codeStats.testFileCount}</span> テスト
+              </span>
+            )}
+            {app.codeStats.todoCount > 0 && (
+              <span style={{ color: 'var(--text2)' }}>
+                <span style={{ color: 'var(--warning)', fontWeight: 700 }}>{app.codeStats.todoCount}</span> TODO
               </span>
             )}
             {app.codeStats.permissions?.length > 0 && (

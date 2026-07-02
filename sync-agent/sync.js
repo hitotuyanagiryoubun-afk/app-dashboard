@@ -86,8 +86,34 @@ function scanCodeStats(repoPath) {
     .filter(p => p && !['RECEIVE_BOOT_COMPLETED'].includes(p))
     .slice(0, 8)
 
-  // build.gradle.kts から機能を判定
+  // build.gradle.kts から機能とバージョンを取得
   const gradle = safeRead(join(repoPath, 'app', 'build.gradle.kts'))
+  const versionNameMatch = gradle.match(/versionName\s*=\s*"([^"]+)"/)
+  const versionCodeMatch = gradle.match(/versionCode\s*=\s*(\d+)/)
+  stats.versionName = versionNameMatch?.[1] || ''
+  stats.versionCode = parseInt(versionCodeMatch?.[1]) || 0
+
+  // テストファイル数
+  let testFileCount = 0
+  for (const testDir of ['app/src/test', 'app/src/androidTest']) {
+    testFileCount += getAllKtFiles(join(repoPath, testDir)).length
+  }
+  stats.testFileCount = testFileCount
+
+  // TODO/FIXME 件数
+  let todoCount = 0
+  for (const { path: fp } of ktFiles) {
+    const content = safeRead(fp)
+    todoCount += (content.match(/\/\/\s*(TODO|FIXME)/gi) || []).length
+  }
+  stats.todoCount = todoCount
+
+  // リリースビルド済みか
+  stats.hasReleaseBuild = (
+    existsSync(join(repoPath, 'app', 'build', 'outputs', 'bundle', 'release')) ||
+    existsSync(join(repoPath, 'app', 'build', 'outputs', 'apk', 'release'))
+  )
+
   const featureMap = [
     { key: 'room',           label: 'Room DB' },
     { key: 'hilt',           label: 'Hilt DI' },
@@ -160,8 +186,9 @@ function getRepoInfo(repoPath) {
     for (const hash of hashes) {
       const subject = runGit(`log -1 --format=%s ${hash}`, repoPath)
       const date = runGit(`log -1 --format=%ar ${hash}`, repoPath)
+      const isoDate = runGit(`log -1 --format=%aI ${hash}`, repoPath)
       const author = runGit(`log -1 --format=%an ${hash}`, repoPath)
-      commits.push({ hash: hash.trim(), subject, date, author })
+      commits.push({ hash: hash.trim(), subject, date, isoDate, author })
     }
   } catch {}
 
