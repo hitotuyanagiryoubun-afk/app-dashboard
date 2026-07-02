@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { db } from '../firebase.js'
+import { ref, onValue, update } from 'firebase/database'
 import AppCard from './AppCard.jsx'
 import AddAppModal from './AddAppModal.jsx'
 
@@ -13,10 +15,31 @@ function isStale(app) {
   return d ? (Date.now() - new Date(d).getTime()) > 7 * 24 * 60 * 60 * 1000 : false
 }
 
-export default function Dashboard({ apps, loading }) {
+export default function Dashboard({ apps, loading, onOpenDocs }) {
   const [showAdd, setShowAdd] = useState(false)
   const [sortBy, setSortBy] = useState('name')
   const [filterBy, setFilterBy] = useState('all')
+  const [autoSync, setAutoSync] = useState({ enabled: false, intervalMinutes: 60 })
+  const [showSettings, setShowSettings] = useState(false)
+
+  useEffect(() => {
+    const unsub = onValue(ref(db, 'settings/autoSync'), (snap) => {
+      if (snap.val()) setAutoSync(snap.val())
+    })
+    return unsub
+  }, [])
+
+  const toggleAutoSync = async () => {
+    const next = { ...autoSync, enabled: !autoSync.enabled }
+    setAutoSync(next)
+    await update(ref(db, 'settings/autoSync'), next)
+  }
+
+  const setInterval_ = async (min) => {
+    const next = { ...autoSync, intervalMinutes: min }
+    setAutoSync(next)
+    await update(ref(db, 'settings/autoSync'), next)
+  }
 
   if (loading) {
     return (
@@ -166,10 +189,69 @@ export default function Dashboard({ apps, loading }) {
           gap: '1rem',
         }}>
           {appList.map((app) => (
-            <AppCard key={app.name} app={app} />
+            <AppCard key={app.name} app={app} onOpenDocs={onOpenDocs} />
           ))}
         </div>
       )}
+
+      {/* 自動実行設定 */}
+      <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+        <button
+          onClick={() => setShowSettings(s => !s)}
+          style={{ fontSize: 13, color: 'var(--text3)', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          ⚙ 自動実行設定 {showSettings ? '▲' : '▼'}
+        </button>
+
+        {showSettings && (
+          <div style={{
+            marginTop: '0.75rem', background: 'var(--surface)',
+            border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+            padding: '1.25rem',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: '1rem' }}>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>sync-agent 自動実行</span>
+              <button
+                onClick={toggleAutoSync}
+                style={{
+                  fontSize: 13, padding: '0.3rem 1rem',
+                  borderRadius: 99,
+                  background: autoSync.enabled ? 'var(--success)' : 'var(--surface2)',
+                  color: autoSync.enabled ? '#fff' : 'var(--text2)',
+                  border: `1px solid ${autoSync.enabled ? 'var(--success)' : 'var(--border)'}`,
+                  fontWeight: 600,
+                }}
+              >
+                {autoSync.enabled ? '✅ ON' : '⛔ OFF'}
+              </button>
+              <span style={{ fontSize: 12, color: 'var(--text3)' }}>実行間隔:</span>
+              {[30, 60, 120].map(min => (
+                <button
+                  key={min}
+                  onClick={() => setInterval_(min)}
+                  style={{
+                    fontSize: 12, padding: '0.25rem 0.6rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)',
+                    background: autoSync.intervalMinutes === min ? 'var(--primary)' : 'var(--surface2)',
+                    color: autoSync.intervalMinutes === min ? '#fff' : 'var(--text2)',
+                  }}
+                >
+                  {min}分
+                </button>
+              ))}
+            </div>
+            <div style={{ background: 'var(--surface2)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: 12, color: 'var(--text2)', lineHeight: 1.8 }}>
+              <strong>初回起動（一度だけ実行）:</strong><br />
+              <code style={{ color: 'var(--primary)', userSelect: 'all' }}>
+                cd C:\Users\user\Projects\app-dashboard\sync-agent &amp;&amp; node sync.js --daemon
+              </code>
+              <br />
+              <span style={{ color: 'var(--text3)' }}>デーモンが起動したあとは、上のトグルでON/OFFを切り替えられます。</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {showAdd && <AddAppModal onClose={() => setShowAdd(false)} />}
     </div>

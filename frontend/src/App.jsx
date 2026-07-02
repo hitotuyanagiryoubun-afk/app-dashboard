@@ -108,6 +108,12 @@ function SetupScreen() {
 export default function App() {
   const [authed, setAuthed] = useState(localStorage.getItem('dashboard_auth') === '1')
   const [tab, setTab] = useState('dashboard')
+  const [docsFilterApp, setDocsFilterApp] = useState('')
+
+  const openDocsForApp = (appName) => {
+    setDocsFilterApp(appName)
+    setTab('docs')
+  }
   const [apps, setApps] = useState({})
   const [lastSynced, setLastSynced] = useState(null)
   const [loading, setLoading] = useState(isFirebaseConfigured)
@@ -196,8 +202,8 @@ export default function App() {
       </header>
 
       <main style={{ maxWidth: 1200, margin: '0 auto', padding: '1.5rem' }}>
-        {tab === 'dashboard' && <Dashboard apps={apps} loading={loading} />}
-        {tab === 'docs' && <DocsTab />}
+        {tab === 'dashboard' && <Dashboard apps={apps} loading={loading} onOpenDocs={openDocsForApp} />}
+        {tab === 'docs' && <DocsTab apps={apps} filterApp={docsFilterApp} onFilterChange={setDocsFilterApp} />}
         {tab === 'guide' && <GuideTab />}
       </main>
     </div>

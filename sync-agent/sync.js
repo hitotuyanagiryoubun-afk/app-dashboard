@@ -295,11 +295,36 @@ async function sync() {
   await set(ref(db, 'lastSynced'), new Date().toISOString())
 
   console.log(`\n✅ 同期完了 — ${allPaths.length} 個のアプリを更新しました`)
-  process.exit(0)
 }
 
-sync().catch((err) => {
-  console.error('❌ 同期エラー:', err.message)
-  console.error('詳細:', err)
-  process.exit(1)
-})
+const isDaemon = process.argv.includes('--daemon')
+
+if (isDaemon) {
+  console.log('👾 デーモンモード起動 (node sync.js --daemon)\n')
+  const loop = async () => {
+    try {
+      const snap = await get(ref(db, 'settings/autoSync'))
+      const cfg = snap.val() || {}
+      if (cfg.enabled !== false) {
+        await sync()
+      } else {
+        console.log(`[${new Date().toLocaleTimeString('ja-JP')}] ⏸ 自動実行OFF — スキップ`)
+      }
+      const next = (cfg.intervalMinutes || 60) * 60 * 1000
+      console.log(`⏱ 次回: ${cfg.intervalMinutes || 60}分後\n`)
+      setTimeout(loop, next)
+    } catch (err) {
+      console.error('❌ エラー:', err.message)
+      setTimeout(loop, 60 * 60 * 1000)
+    }
+  }
+  loop()
+} else {
+  sync()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('❌ 同期エラー:', err.message)
+      console.error('詳細:', err)
+      process.exit(1)
+    })
+}

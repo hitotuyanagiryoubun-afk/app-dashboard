@@ -40,7 +40,7 @@ function relativeTime(isoDate) {
   return `${months}ヶ月前`
 }
 
-export default function AppCard({ app }) {
+export default function AppCard({ app, onOpenDocs }) {
   const [showCommits, setShowCommits] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
   const manual = app.manual || {}
@@ -166,18 +166,33 @@ export default function AppCard({ app }) {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowEdit(true)}
-          style={{
-            fontSize: 12, padding: '0.3rem 0.75rem',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)',
-            color: 'var(--text2)',
-            flexShrink: 0, marginLeft: 8,
-          }}
-        >
-          編集
-        </button>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginLeft: 8 }}>
+          {onOpenDocs && (
+            <button
+              onClick={() => onOpenDocs(app.name)}
+              title="この指示書を見る"
+              style={{
+                fontSize: 12, padding: '0.3rem 0.75rem',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--primary)',
+              }}
+            >
+              📄 指示書
+            </button>
+          )}
+          <button
+            onClick={() => setShowEdit(true)}
+            style={{
+              fontSize: 12, padding: '0.3rem 0.75rem',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text2)',
+            }}
+          >
+            編集
+          </button>
+        </div>
       </div>
 
       {/* プログレスバー */}
